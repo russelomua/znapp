@@ -1,5 +1,8 @@
 # znapp-vue
 
+Schedule for NPP of Ukraine
+Vue.JS demo app
+
 ## Project setup
 ```
 npm install
