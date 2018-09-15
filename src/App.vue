@@ -7,25 +7,21 @@
       dark
     >
       <v-toolbar-side-icon></v-toolbar-side-icon>
-      <v-toolbar-title v-text="title"></v-toolbar-title>
+      <v-toolbar-title>{{title}} / {{currentMonth | moment().format("MMMM YYYY") | capitalize}}</v-toolbar-title>
       <v-spacer></v-spacer>
       
-        <v-container fluid  grid-list-xs text-xs-center slot="extension" :style="{padding: 0}" align-center="true">
-          <v-layout row wrap>
-            <v-flex v-for="(i, key) in ['0', 'А', 'Б', 'В', 'Г', 'Д']" :key="key" xs2>
-              <div v-if="i == '0'">
-                {{today | moment().format("MMMM YYYY")}}
-              </div>
-              <div v-else :style="{fontSize: 25+'px'}">{{i}}</div>
-            </v-flex>
-          </v-layout>
-        </v-container>
-      
+      <v-container v-if="extendedToolbar" fluid  grid-list-xs text-xs-center slot="extension" :style="{padding: 0}" align-center="true">
+        <v-layout row wrap>
+          <v-flex v-for="(i, key) in ['0', 'А', 'Б', 'В', 'Г', 'Д']" :key="key" xs2>
+            <div v-if="i != '0'" :style="{fontSize: 25+'px'}">{{i}}</div>
+          </v-flex>
+        </v-layout>
+      </v-container>
       
       <v-toolbar-items>
-        <v-btn href="#/shifts" flat><v-icon>calendar_today</v-icon></v-btn>
-        <v-btn href="#/personal" flat><v-icon>person</v-icon></v-btn>
-        <v-btn href="#/personal" flat @click.stop="rightDrawer = !rightDrawer"><v-icon>notifications_active</v-icon></v-btn>
+        <v-btn flat fab href="#/shifts"><v-icon>calendar_today</v-icon></v-btn>
+        <v-btn flat fab href="#/personal"><v-icon>person</v-icon></v-btn>
+        <v-btn flat fab @click.stop="rightDrawer = !rightDrawer"><v-icon>notifications_active</v-icon></v-btn>
       </v-toolbar-items>
     </v-toolbar>
 
@@ -57,16 +53,30 @@
 
 <script>
 import moment from 'moment'
+import mixins from './plugins/mixins'
 moment.locale('ru');
 
 export default {
   name: 'App',
   data () {
+    let currentMonth = this.getCurrentMonth(this.$route.params);
     return {
       today: moment(),
       fixed: true,
       rightDrawer: false,
-      title: 'График смен'
+      title: 'График смен',
+      currentMonth: currentMonth
+    }
+  },
+  mixins: [mixins],
+  watch: {
+    '$route' () {
+      this.currentMonth = this.getCurrentMonth(this.$route.params);
+    }
+  },
+  computed: {
+    extendedToolbar: function () {
+      return this.$route.meta.extendedToolbar;
     }
   }
 }

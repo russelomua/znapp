@@ -1,6 +1,7 @@
 import colors from 'vuetify/es5/util/colors';
 
 export default {
+  fab: colors.blueGrey.lighten1,
   days: {
     default: {
       borderColor: colors.blueGrey.lighten4,

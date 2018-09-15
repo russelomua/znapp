@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import moment from 'moment'
 
 import ScheduleShifts from '../components/ScheduleShifts'
 import SchedulePersonal from '../components/SchedulePersonal'
@@ -7,9 +8,12 @@ import SchedulePersonal from '../components/SchedulePersonal'
 Vue.use(VueRouter);
 
 const routes = [
-  { path: '/', component: SchedulePersonal },
-  { path: '/shifts', component: ScheduleShifts },
-  { path: '/personal', component: SchedulePersonal }
+  { path: '/', redirect: function() {
+      return moment().format('/MM/YY')+'/shifts';
+    }
+  },
+  { path: '/:month/:year/shifts', component: ScheduleShifts, meta: { extendedToolbar: true } },
+  { path: '/:month/:year/personal', component: SchedulePersonal, meta: { extendedToolbar: false } }
 ]
 
 

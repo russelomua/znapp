@@ -7,28 +7,69 @@
         </v-flex>
       </v-flex>
     </v-layout>
+    <v-btn
+      fixed
+      dark
+      fab
+      bottom
+      right
+      :color="colors.fab"
+      :href="nextMonth"
+    >
+      <v-icon x-large>chevron_right</v-icon>
+    </v-btn>
+    <v-btn
+      fixed
+      dark
+      fab
+      bottom
+      left
+      :color="colors.fab"
+      :href="prevMonth"
+    >
+      <v-icon x-large>chevron_left</v-icon>
+    </v-btn>
   </v-container>
 </template>
 
 <script>
-  import moment from 'moment'
-import DayShift from './DayShift.vue'  
+import moment from 'moment'
+import colors from '../plugins/colors'
+import DayShift from './DayShift.vue'
+import mixins from '../plugins/mixins'
 
 export default {
   name: 'ScheduleShifts',
   data: function() {
     let today = this.setToday();
-//    let currentMonth = new Date();
-//    currentMonth.setDate(1);
-    let data = this.generateDays();
+    let currentMonth = this.getCurrentMonth(this.$route.params);
+    
     return {
       today: today,
-//      currentMonth: currentMonth,
-      days: data
+      currentMonth: currentMonth,
+      days: this.generateDays(currentMonth),
+      colors: colors
     }
   },
   components: {
     DayShift
+  },
+  mixins: [mixins],
+  watch: {
+    currentMonth: function (val) {
+      this.days = this.generateDays(val);
+    },
+    '$route' () {
+      this.currentMonth = this.getCurrentMonth(this.$route.params);
+    }
+  },
+  computed: {
+    nextMonth: function () {
+      return '#'+moment(this.currentMonth).add(1, 'months').format('/MM/YY')+'/shifts';
+    },
+    prevMonth: function () {
+      return '#'+moment(this.currentMonth).subtract(1, 'months').format('/MM/YY')+'/shifts';
+    }
   },
   methods: {
     setToday () {
@@ -37,13 +78,13 @@ export default {
     setMonth () {
       
     },
-    generateDays () {
-      const daysInMonth = moment().daysInMonth();
+    generateDays (month) {
+      let daysInMonth = month.daysInMonth();
       let data = [];
       let currentDay = 1;
       
       while(currentDay <= daysInMonth) {
-        var current = moment().date(currentDay);
+        var current = moment(month).date(currentDay);
         data.push(current);
         currentDay++;
       }

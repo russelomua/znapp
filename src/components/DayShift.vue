@@ -31,6 +31,13 @@ export default {
       if (this.isWeekend)
         return itemStyle.weekend;
         return itemStyle.default;
+    },
+    
+  },
+  watch: {
+    day: function () {
+      this.isWeekend = ( this.day.format("E") > 5 ? true : false );
+      this.isToday = ( moment().isSame(this.day, 'day') ? true : false );
     }
   },
   methods: {
