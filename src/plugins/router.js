@@ -13,7 +13,7 @@ const routes = [
 ]
 
 
-const router = new VueRouter({
+let router = new VueRouter({
   routes // сокращённая запись для `routes: routes`
 })
 

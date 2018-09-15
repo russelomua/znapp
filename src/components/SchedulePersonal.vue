@@ -17,6 +17,9 @@ export default {
   name: 'SchedulePersonal',
   props: {
     msg: String
+  },
+  methods: {
+    
   }
 }
 </script>
