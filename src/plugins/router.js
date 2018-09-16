@@ -9,16 +9,17 @@ Vue.use(VueRouter);
 
 const routes = [
   { path: '/', redirect: function() {
-      return moment().format('/MM/YY')+'/shifts';
+      return moment().format('/YYYY/MM')+'/shifts';
     }
   },
-  { path: '/:month/:year/shifts', component: ScheduleShifts, meta: { extendedToolbar: true } },
-  { path: '/:month/:year/personal', component: SchedulePersonal, meta: { extendedToolbar: false } }
+  { name: 'shifts', path: '/:year/:month/shifts', component: ScheduleShifts, meta: { extendedToolbar: true } },
+  { name: 'personal', path: '/:year/:month/personal', component: SchedulePersonal, meta: { extendedToolbar: false } }
 ]
 
 
 let router = new VueRouter({
-  routes // сокращённая запись для `routes: routes`
+  mode: 'history',
+  routes: routes
 })
 
 export default router;

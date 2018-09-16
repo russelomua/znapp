@@ -1,43 +1,39 @@
 <template>
-  <div :style="styleObject">{{getShift()}}</div>
+  <div :style="styleObject" :class="{'isShift': isShift}">{{getShift()}}</div>
 </template>
 
 <script>
   import moment from 'moment'
-  import styles from '../plugins/colors.js'
+  import Settings from '../plugins/settings'
 export default {
   name: "DayShift",
   
   data: function () {
-    let isWeekend = ( this.day.format("E") > 5 ? true : false );
-    let isToday = ( moment().isSame(this.day, 'day') ? true : false );
     let isDayNumber = ((this.shift == '0') ? true : false);
     return {
       isDayNumber: isDayNumber,
-      isWeekend: isWeekend,
-      isToday: isToday,
-      styles: styles
+      isShift: false
     }
   },
   props: {
     day: Object,
     shift: String
   },
+  mixins: [Settings],
   computed: {
-    styleObject: function () {
-      let itemStyle = (this.isDayNumber ? this.styles.days : this.styles.shifts)
+    styleObject() {
+      let itemStyle = (this.isDayNumber ? this.settings.days : this.settings.shifts)
       if (this.isToday)
         return itemStyle.today;
       if (this.isWeekend)
         return itemStyle.weekend;
         return itemStyle.default;
     },
-    
-  },
-  watch: {
-    day: function () {
-      this.isWeekend = ( this.day.format("E") > 5 ? true : false );
-      this.isToday = ( moment().isSame(this.day, 'day') ? true : false );
+    isWeekend() {
+      return (this.day.format("E") > 5)
+    },
+    isToday() {
+      return moment().isSame(this.day, 'day')
     }
   },
   methods: {
@@ -52,8 +48,10 @@ export default {
       let days = duration.asDays();
       
       let shiftNumber = Math.floor( days % 15 );
-
-      return this.getShiftContext(shiftNumber);
+      
+      this.isShift = ([3,4, 8,9, 13,14].indexOf(shiftNumber) < 0);
+      
+      return this.getShiftText(shiftNumber);
     },
     getCountdown () {
       const countdowns = {
@@ -65,15 +63,15 @@ export default {
       }
       return countdowns[this.shift];
     },
-    getShiftContext (shiftNumber) {
+    getShiftText (shiftNumber) {
       if ([3,4, 8,9, 13,14].indexOf(shiftNumber)>=0)
-        return 'В';
+        return '-';
       if (shiftNumber < 3)
         return '7';
       if ((shiftNumber > 4) && (shiftNumber < 8))
         return '23';
       if (shiftNumber > 9)
-        return '23';
+        return '15';
     }
   }
 }

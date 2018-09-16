@@ -1,84 +1,57 @@
 <template>
   <v-container fluid  grid-list-xs  text-xs-center>
     <v-layout>
-      <v-flex v-for="shift in ['0', 'А', 'Б', 'В', 'Г', 'Д']" :key="shift" xs2>
+      <v-flex v-for="(shift, index) in settings.shiftsArray" :key="shift" xs2 :class="rowClassName(index)">
         <v-flex wrap v-for="(day, key) in days" :key="key">
-          <DayShift :day="day" :shift="shift" />
+          <DayShift :day="day" :shift="shift" :class="isToday(day)" />
         </v-flex>
+        <div class="total">
+          {{total[index]}}
+        </div>
       </v-flex>
     </v-layout>
-    <v-btn
-      fixed
-      dark
-      fab
-      bottom
-      right
-      :color="colors.fab"
-      :href="nextMonth"
-    >
-      <v-icon x-large>chevron_right</v-icon>
-    </v-btn>
-    <v-btn
-      fixed
-      dark
-      fab
-      bottom
-      left
-      :color="colors.fab"
-      :href="prevMonth"
-    >
-      <v-icon x-large>chevron_left</v-icon>
-    </v-btn>
+    
   </v-container>
 </template>
 
 <script>
 import moment from 'moment'
-import colors from '../plugins/colors'
+import Settings from '../plugins/settings'
 import DayShift from './DayShift.vue'
-import mixins from '../plugins/mixins'
+import PathToMonth from '../plugins/PathToMonth'
 
 export default {
   name: 'ScheduleShifts',
   data: function() {
-    let today = this.setToday();
-    let currentMonth = this.getCurrentMonth(this.$route.params);
-    
     return {
-      today: today,
-      currentMonth: currentMonth,
-      days: this.generateDays(currentMonth),
-      colors: colors
+      days: [],
+      total: []
     }
   },
   components: {
     DayShift
   },
-  mixins: [mixins],
+  mixins: [PathToMonth, Settings],
   watch: {
     currentMonth: function (val) {
       this.days = this.generateDays(val);
-    },
-    '$route' () {
-      this.currentMonth = this.getCurrentMonth(this.$route.params);
     }
   },
-  computed: {
-    nextMonth: function () {
-      return '#'+moment(this.currentMonth).add(1, 'months').format('/MM/YY')+'/shifts';
-    },
-    prevMonth: function () {
-      return '#'+moment(this.currentMonth).subtract(1, 'months').format('/MM/YY')+'/shifts';
-    }
+  updated() {
+    this.$nextTick(function () {
+      this.scrollToday();
+      
+      
+      
+    });
+    for (let i=1;i<=5;i++) {
+        this.total[i] = document.querySelectorAll('.shiftRow-'+i+' .isShift').length;
+      }
   },
   methods: {
-    setToday () {
-      return moment();
-    },
-    setMonth () {
-      
-    },
     generateDays (month) {
+      if (typeof month == 'undefined')
+        return;
       let daysInMonth = month.daysInMonth();
       let data = [];
       let currentDay = 1;
@@ -90,6 +63,18 @@ export default {
       }
       
       return data;
+    },
+    scrollToday() {
+      if (this.isCurrentMonth)
+        this.$vuetify.goTo('.'+this.settings.scrollToday.class, this.settings.scrollToday.params);
+      else
+        this.$vuetify.goTo(0, this.settings.scrollToday.params);
+    },
+    isToday(day) {
+      return (moment().isSame(day, 'day') ? this.settings.scrollToday.class : '')
+    },
+    rowClassName(index) {
+      return "shiftRow-"+index;
     }
   }
 }
@@ -97,5 +82,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+  .total {
+    line-height: 52px;
+    height: 100px;
+    font-size: 25px;
+  }
 </style>

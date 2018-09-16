@@ -1,6 +1,15 @@
 import colors from 'vuetify/es5/util/colors';
 
-export default {
+const settings = {
+  shiftsArray: ['0', 'А', 'Б', 'В', 'Г', 'Д'],
+  scrollToday: {
+    class: 'scrollToday',
+    params: { 
+      offset: -60, 
+      easing: "easeInOutCubic", 
+      duration: 800
+    }
+  },
   fab: colors.blueGrey.lighten1,
   days: {
     default: {
@@ -30,6 +39,14 @@ export default {
     weekend: {
       borderColor: colors.blueGrey.lighten1,
       backgroundColor: colors.blueGrey.lighten5
+    }
+  }
+}
+
+export default {
+  data() {
+    return {
+      settings: settings
     }
   }
 }
