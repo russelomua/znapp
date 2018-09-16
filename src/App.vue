@@ -3,31 +3,64 @@
     <v-toolbar
       color="primary"
       app
-      scroll-off-screen
       dark
     >
-      <v-toolbar-side-icon></v-toolbar-side-icon>
-      <v-toolbar-title>{{title}} / {{currentMonth | moment().format("MMMM YYYY") | capitalize}}</v-toolbar-title>
+      <v-toolbar-side-icon @click="sideMenu=!sideMenu"></v-toolbar-side-icon>
+      <v-toolbar-title>{{title}}</v-toolbar-title>
       <v-spacer></v-spacer>
       
       <v-container v-if="extendedToolbar" fluid  grid-list-xs text-xs-center slot="extension" :style="{padding: 0}" align-center="true">
         <v-layout row wrap>
-          <v-flex v-for="(i, key) in settings.shiftsArray" :key="key" xs2>
-            <div v-if="i != '0'" :style="{fontSize: 25+'px'}">{{i}}</div>
+          <v-flex xs2>
+            <v-btn 
+                   flat icon
+                   :to="{ params: { month: todayMonth.format('MM'), year: todayMonth.format('YYYY') }}">
+              <v-icon>calendar_today</v-icon>
+            </v-btn>
+          </v-flex>
+          <v-flex v-for="(shift, shiftIndex) in settings.shiftsArray" :key="shiftIndex" xs2>
+            <div class="toolbarSecondItem">{{shift}}</div>
           </v-flex>
         </v-layout>
       </v-container>
       
       <v-toolbar-items>
-        <v-btn flat fab :to="{ name: 'shifts'}"><v-icon>calendar_today</v-icon></v-btn>
-        <v-btn flat fab :to="{ name: 'personal'}"><v-icon>person</v-icon></v-btn>
-        <v-btn flat fab @click.stop="rightDrawer = !rightDrawer"><v-icon>notifications_active</v-icon></v-btn>
+        <v-btn flat icon @click.stop="rightDrawer = !rightDrawer"><v-icon>notifications_active</v-icon></v-btn>
       </v-toolbar-items>
     </v-toolbar>
 
     <v-content>
       <router-view></router-view>
     </v-content>
+    
+    <v-navigation-drawer 
+      temporary
+      fixed
+      left
+      v-model="sideMenu"
+    >
+      <v-toolbar color="primary" dark flat>
+        <v-btn icon flat @click="sideMenu=!sideMenu"><v-icon>arrow_back</v-icon></v-btn>
+      </v-toolbar>
+
+      <v-divider></v-divider>
+
+      <v-list class="pt-0">
+        <v-list-tile
+          v-for="item in menuItems"
+          :key="item.title"
+          :to="{ name: item.route }"
+        >
+          <v-list-tile-action>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
     
     <v-navigation-drawer
       temporary
@@ -36,17 +69,25 @@
       right
       app
     >
-      <v-list>
-        <v-list-tile>
+      <v-list dense>
+        <v-list-tile avatar tag="div">
+          <v-list-tile-content>
+            <v-list-tile-title>Уведомления</v-list-tile-title>
+          </v-list-tile-content>
+
           <v-list-tile-action>
-            <v-icon>compare_arrows</v-icon>
+            <v-btn icon @click="rightDrawer=!rightDrawer">
+              <v-icon>chevron_right</v-icon>
+            </v-btn>
           </v-list-tile-action>
-          <v-list-tile-title>Switch drawer (click me)</v-list-tile-title>
         </v-list-tile>
       </v-list>
+
+      <v-divider></v-divider>
+      
     </v-navigation-drawer>
-    <v-footer :fixed="fixed" app>
-      <span>&copy; 2017</span>
+    <v-footer fixed app height="48">
+      <div class="footer">{{currentMonth | moment().format("MMMM YYYY") | capitalize}}</div>
     </v-footer>
     
     <v-btn
@@ -85,9 +126,22 @@ export default {
   name: 'App',
   data () {
     return {
-      fixed: true,
+      title: 'График смен',
       rightDrawer: false,
-      title: 'График смен'
+      sideMenu: false,
+      todayMonth: moment(),
+      menuItems: [
+        {
+          icon: 'view_list',
+          title: 'Все смены',
+          route: 'shifts'
+        },
+        {
+          icon: 'view_module',
+          title: 'Моя смена',
+          route: 'personal'
+        }
+      ]
     }
   },
   mixins: [PathToMonth, Settings],
@@ -104,3 +158,16 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  .toolbarSecondItem {
+    font-size: 24px;
+    margin: 6px 0;
+  }
+  .footer {
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+  }
+</style>

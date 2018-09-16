@@ -1,12 +1,21 @@
 <template>
   <v-container fluid  grid-list-xs  text-xs-center>
     <v-layout>
-      <v-flex v-for="(shift, index) in settings.shiftsArray" :key="shift" xs2 :class="rowClassName(index)">
+      <v-flex xs2>
         <v-flex wrap v-for="(day, key) in days" :key="key">
-          <DayShift :day="day" :shift="shift" :class="isToday(day)" />
+          <DayShift :day="day" :class="isToday(day)" />
         </v-flex>
         <div class="total">
-          {{total[index]}}
+          <v-icon>assessment</v-icon>
+        </div>
+        
+      </v-flex>
+      <v-flex v-for="(shift, shiftIndex) in settings.shiftsArray" :key="shiftIndex" xs2>
+        <v-flex wrap v-for="(day, dayIndex) in days" :key="dayIndex">
+          <DayShift :day="day" :shift="schedule[shiftIndex][dayIndex]" />
+        </v-flex>
+        <div class="total">
+          {{total[shiftIndex]}}
         </div>
       </v-flex>
     </v-layout>
@@ -25,6 +34,7 @@ export default {
   data: function() {
     return {
       days: [],
+      schedule: [],
       total: []
     }
   },
@@ -40,13 +50,7 @@ export default {
   updated() {
     this.$nextTick(function () {
       this.scrollToday();
-      
-      
-      
     });
-    for (let i=1;i<=5;i++) {
-        this.total[i] = document.querySelectorAll('.shiftRow-'+i+' .isShift').length;
-      }
   },
   methods: {
     generateDays (month) {
@@ -54,11 +58,31 @@ export default {
         return;
       let daysInMonth = month.daysInMonth();
       let data = [];
+      this.total = [];
+      this.schedule = [];
       let currentDay = 1;
       
       while(currentDay <= daysInMonth) {
-        var current = moment(month).date(currentDay);
-        data.push(current);
+        var day = moment(month).date(currentDay);
+        data.push(day);
+        
+        let shiftIndex = 0;
+        for (let shift of this.settings.shiftsArray) {
+          const shiftSymbol = this.getShifts(day, shift);
+          
+          if (typeof this.schedule[shiftIndex] === 'undefined')
+            this.schedule[shiftIndex] = [];
+          
+          if (shiftSymbol != '-') {
+            if (typeof this.total[shiftIndex] === 'undefined')
+              this.total[shiftIndex] = 0;
+            this.total[shiftIndex]++;
+          }
+          this.schedule[shiftIndex].push(shiftSymbol);
+          
+          shiftIndex++;
+        }
+          
         currentDay++;
       }
       
@@ -75,6 +99,38 @@ export default {
     },
     rowClassName(index) {
       return "shiftRow-"+index;
+    },
+    getShifts (day, shift) {
+      let countdown = this.getCountdown(shift);
+      
+      let duration = moment.duration(day.diff(countdown));
+      let days = duration.asDays();
+      
+      let shiftNumber = Math.floor( days % 15 );
+      
+      this.isShift = ([3,4, 8,9, 13,14].indexOf(shiftNumber) < 0);
+      
+      return this.getShiftText(shiftNumber);
+    },
+    getCountdown (shift) {
+      const countdowns = {
+        'А': moment('07/12/2013', "MM-DD-YYYY"),
+        'Б': moment('07/06/2013', "MM-DD-YYYY"),
+        'В': moment('07/15/2013', "MM-DD-YYYY"),
+        'Г': moment('07/09/2013', "MM-DD-YYYY"),
+        'Д': moment('08/02/2013', "MM-DD-YYYY")
+      }
+      return countdowns[shift];
+    },
+    getShiftText (shiftNumber) {
+      if ([3,4, 8,9, 13,14].indexOf(shiftNumber)>=0)
+        return '-';
+      if (shiftNumber < 3)
+        return '7';
+      if ((shiftNumber > 4) && (shiftNumber < 8))
+        return '23';
+      if (shiftNumber > 9)
+        return '15';
     }
   }
 }
@@ -83,8 +139,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .total {
-    line-height: 52px;
-    height: 100px;
-    font-size: 25px;
+    line-height: 24px;
+    height: 60px;
+    font-size: 24px;
+    padding: 10px 0;
   }
 </style>

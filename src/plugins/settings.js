@@ -1,7 +1,7 @@
 import colors from 'vuetify/es5/util/colors';
 
 const settings = {
-  shiftsArray: ['0', 'А', 'Б', 'В', 'Г', 'Д'],
+  shiftsArray: ['А', 'Б', 'В', 'Г', 'Д'],
   scrollToday: {
     class: 'scrollToday',
     params: { 
